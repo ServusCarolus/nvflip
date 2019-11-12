@@ -1,0 +1,60 @@
+#!/bin/bash
+# This script requires installation of the nvidia hardware driver and utils.
+
+# These two variables hold the commands to turn flipping either on or off.
+flipoff=nvidia-settings\ -a\ "AllowFlipping=0"
+flipon=nvidia-settings\ -a\ "AllowFlipping=1"
+
+# The variable "flip" is the command to query the driver for the state
+# of whether flipping is on or off.
+flip=nvidia-settings\ -tq\ "AllowFlipping"
+
+# The variable "status" is the temporary file that we use to hold
+# the state value of flipping.
+status=/tmp/flipstat
+
+# We abstracted the command and file name above so we can keep the same actions
+# while easing portability. Now we check the status. The output is in the
+# temporary file specified above.
+$flip>$status
+
+if [ -z "$1" ]
+# If the script has no arguments, we check the state of flipping, then we
+# reverse it (logical not).
+then
+# We open handle six for reading from a file.
+    exec 6<&0
+# We associate that input stream with our temp file.
+    exec <$status
+# We read the value of the variable "result" from that input stream.
+    read result
+# We close the input stream.
+    exec 6<&-
+# We remove the temporary file.
+    rm $status
+
+    if [ "$result" = "1" ]
+    then
+        echo "Flipping is currently on. Now turning it off:"
+        $flipoff
+    else
+        echo "Flipping is currently off. Now turning it on:"
+        $flipon
+    fi
+else
+# Change the state to off or on, depending on the argument
+    if [ "$1" = "on" ]
+    then
+        $flipon
+    elif [ "$1" = "off" ]
+    then
+        $flipoff
+    else
+	echo "Syntax: nvflip [off|on]"
+	echo ""
+	echo "Reverse flipping state: nvflip"
+	echo "Turn flipping off     : nvflip off"
+	echo "Turn flipping onn     : nvflip on"
+	exit 1
+    fi
+fi
