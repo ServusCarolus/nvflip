@@ -54,7 +54,7 @@ else
 	echo ""
 	echo "Reverse flipping state: nvflip"
 	echo "Turn flipping off     : nvflip off"
-	echo "Turn flipping on     : nvflip on"
+	echo "Turn flipping on      : nvflip on"
 	exit 1
     fi
 fi
